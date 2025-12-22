@@ -8,7 +8,7 @@ struct memory get_mem() {
     if (fp == NULL) {
         printf("error opening file /proc/meminfo\n");
         
-        struct memory mem = {0, 0};
+        struct memory mem = {0, 0, 0};
         return mem;
     }
 
@@ -26,6 +26,6 @@ struct memory get_mem() {
     }
     fclose(fp);
 
-    struct memory mem = {total_mem - free_mem, free_mem};
+    struct memory mem = {total_mem - free_mem, free_mem, total_mem};
     return mem;
 }

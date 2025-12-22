@@ -7,8 +7,9 @@
 #include "uptime.h"
 #include "mem.h"
 #include "cpu.h"
+#include "process.h"
 
-#define VERSION "1.0"
+#define VERSION "1.1"
 
 #define COLOR_RESET  "\x1b[0m"
 #define ACCENT_COLOR "\x1b[38;2;203;166;247m"
@@ -21,10 +22,18 @@ void handle_sigint(int sig) {
     exit(0);
 }
 
+void handle_sigwinch(int sig) {
+    (void)sig;
+
+    printf("\033[H\033[J");
+}
+
 int main(int argc, char *argv[]) {
-    // SIGINT & SIGTERM HANDLING
+    // SIGNAL HANDLING
     signal(SIGINT, handle_sigint);
     signal(SIGTERM, handle_sigint);
+
+    signal(SIGWINCH, handle_sigwinch);
 
     // CLI ARGUMENTS
     bool loop = false;
@@ -57,7 +66,7 @@ int main(int argc, char *argv[]) {
         // UPTIME
         struct time uptime = get_uptime();
         
-        printf("%s%-7s%s | ", SECONDARY_COLOR, "uptime", COLOR_RESET);
+        printf("%s%-8s%s | ", SECONDARY_COLOR, "uptime", COLOR_RESET);
         if (uptime.d > 0) {
             printf("%s%d%s day%s | ", ACCENT_COLOR, uptime.d, COLOR_RESET, uptime.d == 1 ? "" : "s");
         }
@@ -66,13 +75,13 @@ int main(int argc, char *argv[]) {
 
         // MEMORY
         struct memory mem = get_mem();
-        printf("%s%-7s%s | used %s%5.2lf%s GB | free %s%5.2lf%s GB\n\n", SECONDARY_COLOR, "memory", COLOR_RESET, ACCENT_COLOR, (double)mem.used / 1024 / 1024, COLOR_RESET, ACCENT_COLOR, (double)mem.free / 1024 / 1024, COLOR_RESET);
+        printf("%s%-8s%s | used %s%5.2lf%s GB | free %s%5.2lf%s GB | total %s%d%s GB\n\n", SECONDARY_COLOR, "memory", COLOR_RESET, ACCENT_COLOR, (double)mem.used / 1024 / 1024, COLOR_RESET, ACCENT_COLOR, (double)mem.free / 1024 / 1024, COLOR_RESET, ACCENT_COLOR, (int)(mem.total / 1024 / 1024), COLOR_RESET);
 
         // CPU
         double cpu_temp = get_cpu_temp();
 
         double cpu_usage = get_cpu_usage();
-        printf("%s%-7s%s | %s%.1lf%s°C | [", SECONDARY_COLOR, "cpu", COLOR_RESET, ACCENT_COLOR, cpu_temp, COLOR_RESET);
+        printf("%s%-8s%s | %s%.1lf%s°C | [", SECONDARY_COLOR, "cpu", COLOR_RESET, ACCENT_COLOR, cpu_temp, COLOR_RESET);
 
         int width = 20;
         int filled = (int)((cpu_usage / 100.0) * width);
@@ -88,7 +97,14 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        printf("] %s%.1f%% %s\n", ACCENT_COLOR, cpu_usage, SECONDARY_COLOR);
+        printf("] %s%.1f%% %s\n\n", ACCENT_COLOR, cpu_usage, SECONDARY_COLOR);
+
+        // PROCESSES
+        struct process *processes = get_top_processes();
+
+        for (int i = 0; i < 15; i++) {
+            printf("%s%-8s%s | pid %s%6d%s | name %s%15.15s%s | uses %s%4lu%s MB of memory ( %s%.1lf%% %s)\n", SECONDARY_COLOR, "process", COLOR_RESET, ACCENT_COLOR, processes[i].pid, COLOR_RESET, ACCENT_COLOR, processes[i].name, COLOR_RESET, ACCENT_COLOR, processes[i].memory_usage, COLOR_RESET, ACCENT_COLOR, (double)processes[i].memory_usage / ((double)mem.total / 1024.0) * 100.0, COLOR_RESET);
+        }
 
         if (loop) {
             usleep(100000);

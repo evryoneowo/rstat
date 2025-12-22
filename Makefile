@@ -1,6 +1,6 @@
 CC = clang
 CFLAGS = -Wall -Wextra
-SRC = main.c mem.c uptime.c cpu.c
+SRC = main.c mem.c uptime.c cpu.c process.c
 TARGET = rstat
 PREFIX = /usr/local
 INSTALL_DIR = $(PREFIX)/bin
