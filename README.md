@@ -1,3 +1,5 @@
+<div align="center"><img src="https://github.com/user-attachments/assets/8c40a534-ed39-4ae3-89d5-3631b9949e14" alt="rstat screenshot" width="800"></div>
+
 # rstat
 light stat utility
 
