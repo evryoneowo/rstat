@@ -7,6 +7,7 @@ light stat utility
 3. `sudo make install`
 
 ## how to use
-`rstat` (usual mode)
-`rstat -l` (monitor mode)
-`rstat -v` (version & info)
+1. `rstat` - usual mode
+2. `rstat -l` - monitor mode
+3. `rstat -v` - version & info
+4. `rstat -n {num}` - specify the num of processes to show

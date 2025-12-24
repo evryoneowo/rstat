@@ -30,13 +30,20 @@ struct cpustat get_cpustat() {
     return ret;
 }
 
+static struct cpustat prev = {0, 0};
 double get_cpu_usage() {
-    struct cpustat prev = get_cpustat();
-    usleep(900000);
+    static int initialized = 0;
+    if (!initialized) {
+        prev = get_cpustat();
+        initialized = 1;
+        usleep(500000);
+    }
     struct cpustat current = get_cpustat();
 
     unsigned long long diff_total = current.total - prev.total;
     unsigned long long diff_idle = current.idle - prev.idle;
+
+    prev = current;
 
     if (diff_total == 0) {
         return 0.0;
